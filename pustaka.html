@@ -1,0 +1,3280 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PUSTAKA — Perpustakaan Digital</title>
+    <meta name="description" content="Dunia Tanpa Batas Ada di Setiap Halaman. Perpustakaan digital premium dengan koleksi lebih dari 12.000 judul buku.">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* ══════════════════════════════════════════════════════════
+           CSS VARIABLES & RESET
+        ══════════════════════════════════════════════════════════ */
+        :root {
+            --bg-dark: #1a1208;
+            --gold: #c9993a;
+            --gold-light: #e8c46a;
+            --cream: #f5f0e8;
+            --brown-warm: #8b6914;
+            --white-milk: #fffdf8;
+            --red-badge: #e74c3c;
+            --font-heading: 'Cormorant Garamond', serif;
+            --font-body: 'Outfit', sans-serif;
+            --transition: 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--white-milk);
+            color: #333;
+            overflow-x: hidden;
+            cursor: none;
+        }
+
+        /* Custom Cursor */
+        .custom-cursor {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--gold);
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 99999;
+            transition: transform 0.1s ease, background 0.2s ease;
+            transform: translate(-50%, -50%);
+        }
+
+        .custom-cursor.hover {
+            background: var(--gold);
+            transform: translate(-50%, -50%) scale(1.5);
+        }
+
+        /* ══════════════════════════════════════════════════════════
+           LOADING SCREEN
+        ══════════════════════════════════════════════════════════ */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-dark);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100000;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+
+        .loading-screen.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .loading-logo {
+            font-family: var(--font-heading);
+            font-size: 4rem;
+            font-weight: 700;
+            color: var(--gold);
+            animation: pulse 1s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.05); }
+        }
+
+        .loading-bar {
+            width: 200px;
+            height: 4px;
+            background: rgba(201, 153, 58, 0.2);
+            border-radius: 2px;
+            margin-top: 30px;
+            overflow: hidden;
+        }
+
+        .loading-progress {
+            height: 100%;
+            background: linear-gradient(90deg, var(--gold), var(--gold-light));
+            border-radius: 2px;
+            animation: loadProgress 2s ease forwards;
+        }
+
+        @keyframes loadProgress {
+            0% { width: 0%; }
+            100% { width: 100%; }
+        }
+
+        /* ══════════════════════════════════════════════════════════
+           NAVBAR
+        ══════════════════════════════════════════════════════════ */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 50px;
+            z-index: 1000;
+            transition: var(--transition);
+        }
+
+        .navbar.scrolled {
+            background: rgba(245, 240, 232, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+        }
+
+        .navbar-logo svg {
+            width: 36px;
+            height: 36px;
+            fill: var(--gold);
+        }
+
+        .navbar.scrolled .navbar-logo svg {
+            fill: var(--gold);
+        }
+
+        .navbar-logo span {
+            font-family: var(--font-heading);
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--gold);
+        }
+
+        .navbar-menu {
+            display: flex;
+            align-items: center;
+            gap: 35px;
+            list-style: none;
+        }
+
+        .navbar-menu a {
+            text-decoration: none;
+            color: var(--cream);
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .navbar.scrolled .navbar-menu a {
+            color: var(--bg-dark);
+        }
+
+        .navbar-menu a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--gold);
+            transition: var(--transition);
+        }
+
+        .navbar-menu a:hover::after {
+            width: 100%;
+        }
+
+        .navbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .nav-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            background: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: none;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .nav-icon svg {
+            width: 22px;
+            height: 22px;
+            stroke: var(--cream);
+            fill: none;
+            stroke-width: 2;
+        }
+
+        .navbar.scrolled .nav-icon svg {
+            stroke: var(--bg-dark);
+        }
+
+        .nav-icon:hover {
+            background: rgba(201, 153, 58, 0.2);
+        }
+
+        .cart-badge {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            width: 18px;
+            height: 18px;
+            background: var(--red-badge);
+            color: white;
+            font-size: 0.7rem;
+            font-weight: 600;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-login {
+            padding: 10px 25px;
+            background: var(--gold);
+            color: var(--bg-dark);
+            border: none;
+            border-radius: 25px;
+            font-family: var(--font-body);
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: none;
+            transition: var(--transition);
+        }
+
+        .btn-login:hover {
+            background: var(--gold-light);
+            transform: translateY(-2px);
+        }
+
+        .search-input-wrapper {
+            position: absolute;
+            right: 100%;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 0;
+            overflow: hidden;
+            transition: var(--transition);
+        }
+
+        .search-input-wrapper.active {
+            width: 250px;
+            margin-right: 15px;
+        }
+
+        .search-input-wrapper input {
+            width: 100%;
+            padding: 10px 15px;
+            border: 2px solid var(--gold);
+            border-radius: 25px;
+            background: var(--white-milk);
+            font-family: var(--font-body);
+            font-size: 0.9rem;
+            outline: none;
+        }
+
+        /* Mobile Menu */
+        .mobile-menu-btn {
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            background: none;
+            border: none;
+            cursor: none;
+            padding: 5px;
+        }
+
+        .mobile-menu-btn span {
+            width: 25px;
+            height: 2px;
+            background: var(--cream);
+            transition: var(--transition);
+        }
+
+        .navbar.scrolled .mobile-menu-btn span {
+            background: var(--bg-dark);
+        }
+
+        .mobile-menu {
+            display: none;
+            position: fixed;
+            top: 70px;
+            left: 0;
+            width: 100%;
+            background: var(--cream);
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .mobile-menu.active {
+            display: block;
+        }
+
+        .mobile-menu a {
+            display: block;
+            padding: 15px 20px;
+            color: var(--bg-dark);
+            text-decoration: none;
+            font-weight: 500;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        /* ══════════════════════════════════════════════════════════
+           HERO SECTION
+        ══════════════════════════════════════════════════════════ */
+        .hero {
+            min-height: 100vh;
+            background: linear-gradient(135deg, var(--bg-dark) 0%, #2a1f10 100%);
+            position: relative;
+            display: flex;
+            align-items: center;
+            padding: 100px 50px 50px;
+            overflow: hidden;
+        }
+
+        /* Grain Texture */
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+            opacity: 0.03;
+            pointer-events: none;
+        }
+
+        /* Vertical Lines */
+        .hero-lines {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .hero-lines::before,
+        .hero-lines::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            height: 100%;
+            width: 1px;
+            background: linear-gradient(to bottom, transparent, rgba(201, 153, 58, 0.1), transparent);
+        }
+
+        .hero-lines::before { left: 20%; }
+        .hero-lines::after { left: 80%; }
+
+        /* Glowing Orbs */
+        .glow-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            animation: floatOrb 8s ease-in-out infinite;
+        }
+
+        .glow-orb-1 {
+            width: 400px;
+            height: 400px;
+            background: rgba(201, 153, 58, 0.15);
+            top: 10%;
+            right: 10%;
+            animation-delay: 0s;
+        }
+
+        .glow-orb-2 {
+            width: 300px;
+            height: 300px;
+            background: rgba(232, 196, 106, 0.1);
+            bottom: 20%;
+            left: 5%;
+            animation-delay: -4s;
+        }
+
+        @keyframes floatOrb {
+            0%, 100% { transform: translate(0, 0); }
+            25% { transform: translate(20px, -30px); }
+            50% { transform: translate(-10px, 20px); }
+            75% { transform: translate(30px, 10px); }
+        }
+
+        .hero-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-left {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .hero-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(201, 153, 58, 0.1);
+            border: 1px solid rgba(201, 153, 58, 0.3);
+            padding: 8px 20px;
+            border-radius: 30px;
+            color: var(--gold);
+            font-size: 0.85rem;
+            margin-bottom: 25px;
+            width: fit-content;
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeUp 0.8s ease forwards;
+            animation-delay: 2.2s;
+        }
+
+        .hero-title {
+            font-family: var(--font-heading);
+            font-size: 4rem;
+            font-weight: 600;
+            color: var(--cream);
+            line-height: 1.1;
+            margin-bottom: 25px;
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeUp 0.8s ease forwards;
+            animation-delay: 2.4s;
+        }
+
+        .hero-title .highlight {
+            font-style: italic;
+            color: var(--gold);
+        }
+
+        .hero-desc {
+            color: rgba(245, 240, 232, 0.7);
+            font-size: 1.1rem;
+            line-height: 1.7;
+            margin-bottom: 35px;
+            max-width: 500px;
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeUp 0.8s ease forwards;
+            animation-delay: 2.6s;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 50px;
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeUp 0.8s ease forwards;
+            animation-delay: 2.8s;
+        }
+
+        .btn-primary {
+            padding: 15px 35px;
+            background: var(--gold);
+            color: var(--bg-dark);
+            border: none;
+            border-radius: 30px;
+            font-family: var(--font-body);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: none;
+            transition: var(--transition);
+        }
+
+        .btn-primary:hover {
+            background: var(--gold-light);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(201, 153, 58, 0.3);
+        }
+
+        .btn-outline {
+            padding: 15px 35px;
+            background: transparent;
+            color: var(--gold);
+            border: 2px solid var(--gold);
+            border-radius: 30px;
+            font-family: var(--font-body);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: none;
+            transition: var(--transition);
+        }
+
+        .btn-outline:hover {
+            background: var(--gold);
+            color: var(--bg-dark);
+            transform: translateY(-3px);
+        }
+
+        .hero-stats {
+            display: flex;
+            gap: 50px;
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeUp 0.8s ease forwards;
+            animation-delay: 3s;
+        }
+
+        .stat-item {
+            text-align: left;
+        }
+
+        .stat-number {
+            font-family: var(--font-heading);
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--gold);
+            line-height: 1;
+        }
+
+        .stat-label {
+            color: rgba(245, 240, 232, 0.6);
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+
+        @keyframes fadeUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Hero Books */
+        .hero-right {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            animation: fadeUp 1s ease forwards;
+            animation-delay: 3.2s;
+        }
+
+        .books-stack {
+            position: relative;
+            width: 350px;
+            height: 450px;
+            perspective: 1000px;
+        }
+
+        .book-3d {
+            position: absolute;
+            width: 180px;
+            height: 260px;
+            border-radius: 5px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+            transition: var(--transition);
+            cursor: none;
+        }
+
+        .book-3d:hover {
+            transform: translateX(-30px) !important;
+        }
+
+        .book-1 {
+            background: linear-gradient(135deg, #c0392b, #922b21);
+            transform: rotateY(-15deg) rotateX(5deg);
+            z-index: 4;
+            left: 80px;
+            top: 50px;
+        }
+
+        .book-2 {
+            background: linear-gradient(135deg, #27ae60, #1e8449);
+            transform: rotateY(-15deg) rotateX(5deg) translateZ(-30px);
+            z-index: 3;
+            left: 100px;
+            top: 70px;
+        }
+
+        .book-3 {
+            background: linear-gradient(135deg, #2980b9, #1a5276);
+            transform: rotateY(-15deg) rotateX(5deg) translateZ(-60px);
+            z-index: 2;
+            left: 120px;
+            top: 90px;
+        }
+
+        .book-4 {
+            background: linear-gradient(135deg, #8b6914, #5d4409);
+            transform: rotateY(-15deg) rotateX(5deg) translateZ(-90px);
+            z-index: 1;
+            left: 140px;
+            top: 110px;
+        }
+
+        .book-3d::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 15px;
+            right: 15px;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 2px;
+        }
+
+        .book-3d::after {
+            content: '';
+            position: absolute;
+            top: 40px;
+            left: 15px;
+            width: 60%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+        }
+
+        /* ══════════════════════════════════════════════════════════
+           MARQUEE BAR
+        ══════════════════════════════════════════════════════════ */
+        .marquee-bar {
+            background: var(--gold);
+            padding: 15px 0;
+            overflow: hidden;
+        }
+
+        .marquee-content {
+            display: flex;
+            animation: marquee 30s linear infinite;
+        }
+
+        .marquee-item {
+            white-space: nowrap;
+            color: var(--bg-dark);
+            font-weight: 600;
+            font-size: 0.95rem;
+            padding: 0 30px;
+        }
+
+        .marquee-item::after {
+            content: '◆';
+            margin-left: 30px;
+        }
+
+        @keyframes marquee {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        /* ══════════════════════════════════════════════════════════
+           STATS STRIP
+        ══════════════════════════════════════════════════════════ */
+        .stats-strip {
+            background: var(--cream);
+            padding: 40px 50px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 25px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .stat-card {
+            background: var(--white-milk);
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+            transition: var(--transition);
+            cursor: none;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-card-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .stat-card-number {
+            font-family: var(--font-heading);
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--bg-dark);
+        }
+
+        .stat-card-label {
+            color: #666;
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+
+        /* ══════════════════════════════════════════════════════════
+           SECTION STYLES
+        ══════════════════════════════════════════════════════════ */
+        .section {
+            padding: 100px 50px;
+        }
+
+        .section-white { background: var(--white-milk); }
+        .section-cream { background: var(--cream); }
+        .section-dark { background: var(--bg-dark); }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .section-title {
+            font-family: var(--font-heading);
+            font-size: 3rem;
+            font-weight: 600;
+            color: var(--bg-dark);
+            margin-bottom: 15px;
+        }
+
+        .section-dark .section-title {
+            color: var(--cream);
+        }
+
+        .section-subtitle {
+            color: #666;
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .section-dark .section-subtitle {
+            color: rgba(245, 240, 232, 0.7);
+        }
+
+        /* Reveal Animation */
+        .reveal {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ══════════════════════════════════════════════════════════
+           CATEGORIES SECTION
+        ══════════════════════════════════════════════════════════ */
+        .categories-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 25px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .category-card {
+            position: relative;
+            height: 280px;
+            border-radius: 15px;
+            overflow: hidden;
+            cursor: none;
+            transition: var(--transition);
+        }
+
+        .category-card:hover {
+            transform: translateY(-10px);
+        }
+
+        .category-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: var(--transition);
+        }
+
+        .category-card:hover img {
+            transform: scale(1.1);
+        }
+
+        .category-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to top, rgba(26, 18, 8, 0.95), rgba(26, 18, 8, 0.3));
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 25px;
+            transition: var(--transition);
+        }
+
+        .category-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .category-name {
+            font-family: var(--font-heading);
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--cream);
+        }
+
+        .category-count {
+            color: var(--gold);
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+
+        .category-arrow {
+            position: absolute;
+            right: 25px;
+            bottom: 25px;
+            width: 40px;
+            height: 40px;
+            background: var(--gold);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transform: translateX(-10px);
+            transition: var(--transition);
+        }
+
+        .category-card:hover .category-arrow {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .category-arrow svg {
+            width: 20px;
+            height: 20px;
+            stroke: var(--bg-dark);
+            fill: none;
+        }
+
+        /* ══════════════════════════════════════════════════════════
+           BOOKS COLLECTION SECTION
+        ══════════════════════════════════════════════════════════ */
+        .filter-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 50px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 12px 30px;
+            background: var(--white-milk);
+            border: 2px solid #ddd;
+            border-radius: 30px;
+            font-family: var(--font-body);
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: none;
+            transition: var(--transition);
+        }
+
+        .filter-btn:hover,
+        .filter-btn.active {
+            background: var(--gold);
+            border-color: var(--gold);
+            color: var(--bg-dark);
+        }
+
+        .books-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .book-card {
+            background: var(--white-milk);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+            transition: var(--transition);
+        }
+
+        .book-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+        }
+
+        .book-image {
+            position: relative;
+            height: 220px;
+            overflow: hidden;
+        }
+
+        .book-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: var(--transition);
+        }
+
+        .book-card:hover .book-image img {
+            transform: scale(1.05);
+        }
+
+        .book-badge {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            padding: 5px 15px;
+            background: var(--gold);
+            color: var(--bg-dark);
+            font-size: 0.75rem;
+            font-weight: 600;
+            border-radius: 20px;
+        }
+
+        .book-badge.new {
+            background: #27ae60;
+            color: white;
+        }
+
+        .book-badge.recommended {
+            background: #3498db;
+            color: white;
+        }
+
+        .book-favorite {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 35px;
+            height: 35px;
+            background: white;
+            border: none;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: none;
+            transition: var(--transition);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .book-favorite svg {
+            width: 18px;
+            height: 18px;
+            stroke: #999;
+            fill: none;
+            transition: var(--transition);
+        }
+
+        .book-favorite.active svg {
+            fill: var(--red-badge);
+            stroke: var(--red-badge);
+        }
+
+        .book-hover-actions {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 15px;
+            display: flex;
+            gap: 10px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: var(--transition);
+        }
+
+        .book-card:hover .book-hover-actions {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .book-hover-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            font-family: var(--font-body);
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: none;
+            transition: var(--transition);
+        }
+
+        .btn-detail {
+            background: var(--white-milk);
+            color: var(--bg-dark);
+        }
+
+        .btn-borrow {
+            background: var(--gold);
+            color: var(--bg-dark);
+        }
+
+        .btn-detail:hover { background: #eee; }
+        .btn-borrow:hover { background: var(--gold-light); }
+
+        .book-info {
+            padding: 20px;
+        }
+
+        .book-genre {
+            color: var(--gold);
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .book-title {
+            font-family: var(--font-heading);
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--bg-dark);
+            margin: 8px 0;
+            line-height: 1.3;
+        }
+
+        .book-author {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .book-author span {
+            color: #999;
+        }
+
+        .book-rating {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .stars {
+            display: flex;
+            gap: 2px;
+        }
+
+        .stars svg {
+            width: 14px;
+            height: 14px;
+            fill: var(--gold);
+        }
+
+        .rating-count {
+            color: #999;
+            font-size: 0.8rem;
+        }
+
+        .book-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+
+        .book-price {
+            color: #27ae60;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .book-add-btn {
+            width: 35px;
+            height: 35px;
+            background: var(--gold);
+            border: none;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: none;
+            transition: var(--transition);
+        }
+
+        .book-add-btn:hover {
+            background: var(--gold-light);
+            transform: scale(1.1);
+        }
+
+        .book-add-btn svg {
+            width: 16px;
+            height: 16px;
+            stroke: var(--bg-dark);
+            fill: none;
+        }
+
+        /* ══════════════════════════════════════════════════════════
+           SERVICES SECTION
+        ══════════════════════════════════════════════════════════ */
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .service-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(201, 153, 58, 0.2);
+            border-radius: 15px;
+            padding: 40px 30px;
+            transition: var(--transition);
+            cursor: none;
+        }
+
+        .service-card:hover {
+            border-color: var(--gold);
+            transform: translateY(-10px);
+            background: rgba(201, 153, 58, 0.05);
+        }
+
+        .service-icon {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+
+        .service-title {
+            font-family: var(--font-heading);
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--cream);
+            margin-bottom: 15px;
+        }
+
+        .service-desc {
+            color: rgba(245, 240, 232, 0.7);
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        /* ══════════════════════════════════════════════════════════
+           NEWSLETTER BANNER
+        ══════════════════════════════════════════════════════════ */
+        .newsletter-banner {
+            background: linear-gradient(135deg, var(--brown-warm), var(--gold));
+            padding: 80px 50px;
+            text-align: center;
+        }
+
+        .newsletter-title {
+            font-family: var(--font-heading);
+            font-size: 2.5rem;
+            font-weight: 600;
+            color: var(--bg-dark);
+            margin-bottom: 10px;
+        }
+
+        .newsletter-subtitle {
+            color: rgba(26, 18, 8, 0.7);
+            font-size: 1.1rem;
+            margin-bottom: 30px;
+        }
+
+        .newsletter-form {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .newsletter-input {
+            flex: 1;
+            padding: 15px 25px;
+            border: none;
+            border-radius: 30px;
+            font-family: var(--font-body);
+            font-size: 1rem;
+            background: var(--white-milk);
+            outline: none;
+        }
+
+        .newsletter-btn {
+            padding: 15px 35px;
+            background: var(--bg-dark);
+            color: var(--gold);
+            border: none;
+            border-radius: 30px;
+            font-family: var(--font-body);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: none;
+            transition: var(--transition);
+            white-space: nowrap;
+        }
+
+        .newsletter-btn:hover {
+            background: #2a1f10;
+            transform: translateY(-3px);
+        }
+
+        /* ══════════════════════════════════════════════════════════
+           ARTICLES SECTION
+        ══════════════════════════════════════════════════════════ */
+        .articles-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .article-card {
+            background: var(--white-milk);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+            transition: var(--transition);
+            cursor: none;
+        }
+
+        .article-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+        }
+
+        .article-image {
+            height: 200px;
+            overflow: hidden;
+        }
+
+        .article-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: var(--transition);
+        }
+
+        .article-card:hover .article-image img {
+            transform: scale(1.05);
+        }
+
+        .article-content {
+            padding: 25px;
+        }
+
+        .article-meta {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .article-category {
+            padding: 5px 12px;
+            background: rgba(201, 153, 58, 0.1);
+            color: var(--gold);
+            font-size: 0.75rem;
+            font-weight: 600;
+            border-radius: 15px;
+        }
+
+        .article-date {
+            color: #999;
+            font-size: 0.85rem;
+        }
+
+        .article-title {
+            font-family: var(--font-heading);
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--bg-dark);
+            margin-bottom: 12px;
+            line-height: 1.4;
+        }
+
+        .article-excerpt {
+            color: #666;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .article-read-time {
+            color: var(--gold);
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        /* ══════════════════════════════════════════════════════════
+           TESTIMONIALS SECTION
+        ══════════════════════════════════════════════════════════ */
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .testimonial-card {
+            background: var(--cream);
+            border-radius: 15px;
+            padding: 35px;
+            transition: var(--transition);
+        }
+
+        .testimonial-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
+        }
+
+        .testimonial-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .testimonial-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--gold);
+        }
+
+        .testimonial-info h4 {
+            font-family: var(--font-heading);
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--bg-dark);
+        }
+
+        .testimonial-info p {
+            color: #666;
+            font-size: 0.85rem;
+        }
+
+        .testimonial-stars {
+            display: flex;
+            gap: 3px;
+            margin-bottom: 15px;
+        }
+
+        .testimonial-stars svg {
+            width: 18px;
+            height: 18px;
+            fill: var(--gold);
+        }
+
+        .testimonial-text {
+            color: #555;
+            font-size: 0.95rem;
+            line-height: 1.7;
+            font-style: italic;
+        }
+
+        /* ══════════════════════════════════════════════════════════
+           FOOTER
+        ══════════════════════════════════════════════════════════ */
+        .footer {
+            background: var(--bg-dark);
+            padding: 80px 50px 30px;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 50px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .footer-brand .footer-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .footer-brand .footer-logo svg {
+            width: 40px;
+            height: 40px;
+            fill: var(--gold);
+        }
+
+        .footer-brand .footer-logo span {
+            font-family: var(--font-heading);
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--gold);
+        }
+
+        .footer-desc {
+            color: rgba(245, 240, 232, 0.7);
+            font-size: 0.95rem;
+            line-height: 1.7;
+            margin-bottom: 25px;
+        }
+
+        .footer-social {
+            display: flex;
+            gap: 12px;
+        }
+
+        .social-btn {
+            width: 45px;
+            height: 45px;
+            background: rgba(201, 153, 58, 0.1);
+            border: 1px solid rgba(201, 153, 58, 0.3);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: none;
+            transition: var(--transition);
+        }
+
+        .social-btn:hover {
+            background: var(--gold);
+            border-color: var(--gold);
+        }
+
+        .social-btn svg {
+            width: 20px;
+            height: 20px;
+            fill: var(--gold);
+            transition: var(--transition);
+        }
+
+        .social-btn:hover svg {
+            fill: var(--bg-dark);
+        }
+
+        .footer-column h4 {
+            font-family: var(--font-heading);
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--cream);
+            margin-bottom: 25px;
+        }
+
+        .footer-links {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 12px;
+        }
+
+        .footer-links a {
+            color: rgba(245, 240, 232, 0.7);
+            text-decoration: none;
+            font-size: 0.95rem;
+            transition: var(--transition);
+        }
+
+        .footer-links a:hover {
+            color: var(--gold);
+        }
+
+        .footer-bottom {
+            max-width: 1200px;
+            margin: 50px auto 0;
+            padding-top: 30px;
+            border-top: 1px solid rgba(245, 240, 232, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .footer-copyright {
+            color: rgba(245, 240, 232, 0.5);
+            font-size: 0.9rem;
+        }
+
+        .footer-badges {
+            display: flex;
+            gap: 15px;
+        }
+
+        .footer-badge {
+            padding: 8px 18px;
+            background: rgba(201, 153, 58, 0.1);
+            border: 1px solid rgba(201, 153, 58, 0.3);
+            border-radius: 20px;
+            color: var(--gold);
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        /* ══════════════════════════════════════════════════════════
+           CART SIDEBAR
+        ══════════════════════════════════════════════════════════ */
+        .cart-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 9998;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition);
+        }
+
+        .cart-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .cart-sidebar {
+            position: fixed;
+            top: 0;
+            right: -400px;
+            width: 400px;
+            height: 100%;
+            background: var(--white-milk);
+            z-index: 9999;
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .cart-sidebar.active {
+            right: 0;
+        }
+
+        .cart-header {
+            padding: 25px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .cart-header h3 {
+            font-family: var(--font-heading);
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .cart-close {
+            width: 40px;
+            height: 40px;
+            background: none;
+            border: none;
+            cursor: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .cart-close:hover {
+            transform: rotate(90deg);
+        }
+
+        .cart-close svg {
+            width: 24px;
+            height: 24px;
+            stroke: #333;
+        }
+
+        .cart-items {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .cart-empty {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .cart-empty-icon {
+            font-size: 4rem;
+            margin-bottom: 15px;
+        }
+
+        .cart-empty-text {
+            color: #666;
+            font-size: 1rem;
+        }
+
+        .cart-item {
+            display: flex;
+            gap: 15px;
+            padding: 15px;
+            background: var(--cream);
+            border-radius: 12px;
+            margin-bottom: 15px;
+        }
+
+        .cart-item-image {
+            width: 70px;
+            height: 90px;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+
+        .cart-item-info {
+            flex: 1;
+        }
+
+        .cart-item-title {
+            font-family: var(--font-heading);
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--bg-dark);
+            margin-bottom: 5px;
+        }
+
+        .cart-item-author {
+            color: #666;
+            font-size: 0.85rem;
+            margin-bottom: 10px;
+        }
+
+        .cart-item-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .qty-btn {
+            width: 28px;
+            height: 28px;
+            background: var(--white-milk);
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 1rem;
+            cursor: none;
+            transition: var(--transition);
+        }
+
+        .qty-btn:hover {
+            background: var(--gold);
+            border-color: var(--gold);
+        }
+
+        .cart-item-qty {
+            font-weight: 600;
+            min-width: 25px;
+            text-align: center;
+        }
+
+        .cart-item-remove {
+            margin-left: auto;
+            background: none;
+            border: none;
+            cursor: none;
+            padding: 5px;
+        }
+
+        .cart-item-remove svg {
+            width: 18px;
+            height: 18px;
+            stroke: #999;
+            transition: var(--transition);
+        }
+
+        .cart-item-remove:hover svg {
+            stroke: var(--red-badge);
+        }
+
+        .cart-footer {
+            padding: 25px;
+            border-top: 1px solid #eee;
+        }
+
+        .cart-total {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .cart-total-label {
+            font-size: 1rem;
+            color: #666;
+        }
+
+        .cart-total-value {
+            font-family: var(--font-heading);
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--bg-dark);
+        }
+
+        .cart-checkout-btn {
+            width: 100%;
+            padding: 15px;
+            background: var(--gold);
+            color: var(--bg-dark);
+            border: none;
+            border-radius: 10px;
+            font-family: var(--font-body);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: none;
+            transition: var(--transition);
+        }
+
+        .cart-checkout-btn:hover {
+            background: var(--gold-light);
+        }
+
+        /* ══════════════════════════════════════════════════════════
+           BOOK MODAL
+        ══════════════════════════════════════════════════════════ */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 9998;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal {
+            background: var(--white-milk);
+            border-radius: 20px;
+            max-width: 900px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            transform: scale(0.8);
+            opacity: 0;
+            transition: var(--transition);
+        }
+
+        .modal-overlay.active .modal {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        .modal-content {
+            display: grid;
+            grid-template-columns: 1fr 1.5fr;
+            gap: 40px;
+            padding: 40px;
+        }
+
+        .modal-image {
+            border-radius: 15px;
+            overflow: hidden;
+        }
+
+        .modal-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 45px;
+            height: 45px;
+            background: var(--white-milk);
+            border: none;
+            border-radius: 50%;
+            cursor: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: var(--transition);
+        }
+
+        .modal-close:hover {
+            transform: rotate(90deg);
+        }
+
+        .modal-close svg {
+            width: 20px;
+            height: 20px;
+            stroke: #333;
+        }
+
+        .modal-info {
+            position: relative;
+        }
+
+        .modal-genre {
+            color: var(--gold);
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+
+        .modal-title {
+            font-family: var(--font-heading);
+            font-size: 2.2rem;
+            font-weight: 600;
+            color: var(--bg-dark);
+            margin-bottom: 10px;
+        }
+
+        .modal-author {
+            color: #666;
+            font-size: 1rem;
+            margin-bottom: 20px;
+        }
+
+        .modal-rating {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        .modal-rating .stars svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .modal-rating-text {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .modal-desc {
+            color: #555;
+            font-size: 1rem;
+            line-height: 1.8;
+            margin-bottom: 25px;
+        }
+
+        .modal-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .modal-chip {
+            padding: 8px 18px;
+            background: var(--cream);
+            border-radius: 20px;
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .modal-btn {
+            flex: 1;
+            padding: 15px 25px;
+            border-radius: 10px;
+            font-family: var(--font-body);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: none;
+            transition: var(--transition);
+        }
+
+        .modal-btn-primary {
+            background: var(--gold);
+            color: var(--bg-dark);
+            border: none;
+        }
+
+        .modal-btn-primary:hover {
+            background: var(--gold-light);
+        }
+
+        .modal-btn-secondary {
+            background: transparent;
+            color: var(--bg-dark);
+            border: 2px solid #ddd;
+        }
+
+        .modal-btn-secondary:hover {
+            border-color: var(--gold);
+            color: var(--gold);
+        }
+
+        .modal-note {
+            color: #999;
+            font-size: 0.85rem;
+            line-height: 1.6;
+        }
+
+        /* ══════════════════════════════════════════════════════════
+           TOAST NOTIFICATION
+        ══════════════════════════════════════════════════════════ */
+        .toast-container {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 99999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .toast {
+            background: var(--white-milk);
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            border-left: 4px solid var(--gold);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            animation: toastIn 0.3s ease forwards;
+        }
+
+        .toast.removing {
+            animation: toastOut 0.3s ease forwards;
+        }
+
+        @keyframes toastIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes toastOut {
+            from {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+        }
+
+        .toast-icon {
+            font-size: 1.3rem;
+        }
+
+        .toast-message {
+            font-size: 0.95rem;
+            color: var(--bg-dark);
+        }
+
+        /* ══════════════════════════════════════════════════════════
+           RESPONSIVE STYLES
+        ══════════════════════════════════════════════════════════ */
+        @media (max-width: 1024px) {
+            .hero-content {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+
+            .hero-left {
+                align-items: center;
+            }
+
+            .hero-right {
+                display: none;
+            }
+
+            .hero-stats {
+                justify-content: center;
+            }
+
+            .categories-grid,
+            .books-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .services-grid,
+            .articles-grid,
+            .testimonials-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .footer-content {
+                grid-template-columns: 1fr 1fr;
+                gap: 40px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                cursor: auto;
+            }
+
+            .custom-cursor {
+                display: none;
+            }
+
+            .navbar {
+                padding: 0 20px;
+            }
+
+            .navbar-menu {
+                display: none;
+            }
+
+            .mobile-menu-btn {
+                display: flex;
+            }
+
+            .navbar-actions .nav-icon:not(.cart-btn),
+            .btn-login {
+                display: none;
+            }
+
+            .hero {
+                padding: 100px 20px 50px;
+            }
+
+            .hero-title {
+                font-size: 2.5rem;
+            }
+
+            .hero-buttons {
+                flex-direction: column;
+                width: 100%;
+                max-width: 300px;
+            }
+
+            .hero-stats {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .section {
+                padding: 60px 20px;
+            }
+
+            .section-title {
+                font-size: 2rem;
+            }
+
+            .stats-strip {
+                padding: 30px 20px;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .categories-grid,
+            .books-grid,
+            .services-grid,
+            .articles-grid,
+            .testimonials-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-buttons {
+                overflow-x: auto;
+                justify-content: flex-start;
+                padding-bottom: 10px;
+            }
+
+            .newsletter-form {
+                flex-direction: column;
+            }
+
+            .footer-content {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+
+            .footer-bottom {
+                flex-direction: column;
+                gap: 20px;
+                text-align: center;
+            }
+
+            .footer-badges {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .cart-sidebar {
+                width: 100%;
+                right: -100%;
+            }
+
+            .modal-content {
+                grid-template-columns: 1fr;
+                padding: 25px;
+            }
+
+            .modal-image {
+                height: 250px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Custom Cursor -->
+    <div class="custom-cursor" id="cursor"></div>
+
+    <!-- Loading Screen -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loading-logo">PUSTAKA</div>
+        <div class="loading-bar">
+            <div class="loading-progress"></div>
+        </div>
+    </div>
+
+    <!-- Navbar -->
+    <nav class="navbar" id="navbar">
+        <a href="#" class="navbar-logo">
+            <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M4 19.5A2.5 2.5 0 0 0 6.5 22H20V2H6.5A2.5 2.5 0 0 0 4 4.5v15z"/></svg>
+            <span>PUSTAKA</span>
+        </a>
+
+        <ul class="navbar-menu">
+            <li><a href="#hero">Beranda</a></li>
+            <li><a href="#kategori">Kategori</a></li>
+            <li><a href="#koleksi">Koleksi</a></li>
+            <li><a href="#layanan">Layanan</a></li>
+            <li><a href="#artikel">Artikel</a></li>
+            <li><a href="#footer">Kontak</a></li>
+        </ul>
+
+        <div class="navbar-actions">
+            <div style="position: relative;">
+                <div class="search-input-wrapper" id="searchWrapper">
+                    <input type="text" id="searchInput" placeholder="Cari judul atau pengarang...">
+                </div>
+                <button class="nav-icon" id="searchBtn" aria-label="Search">
+                    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                </button>
+            </div>
+            <button class="nav-icon" id="favoriteBtn" aria-label="Favorites">
+                <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+            </button>
+            <button class="nav-icon cart-btn" id="cartBtn" aria-label="Cart">
+                <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M4 19.5A2.5 2.5 0 0 0 6.5 22H20V2H6.5A2.5 2.5 0 0 0 4 4.5v15z"/></svg>
+                <span class="cart-badge" id="cartBadge">0</span>
+            </button>
+            <button class="btn-login" id="loginBtn">Masuk</button>
+            <button class="mobile-menu-btn" id="mobileMenuBtn">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu" id="mobileMenu">
+        <a href="#hero">Beranda</a>
+        <a href="#kategori">Kategori</a>
+        <a href="#koleksi">Koleksi</a>
+        <a href="#layanan">Layanan</a>
+        <a href="#artikel">Artikel</a>
+        <a href="#footer">Kontak</a>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="hero" id="hero">
+        <div class="hero-lines"></div>
+        <div class="glow-orb glow-orb-1"></div>
+        <div class="glow-orb glow-orb-2"></div>
+
+        <div class="hero-content">
+            <div class="hero-left">
+                <span class="hero-label">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                    Selamat Datang di Perpustakaan Digital
+                </span>
+                <h1 class="hero-title">
+                    Dunia Tanpa Batas Ada di <span class="highlight">Setiap Halaman</span>
+                </h1>
+                <p class="hero-desc">
+                    PUSTAKA adalah perpustakaan digital modern dengan lebih dari 12.000 judul buku, audiobook premium, dan ruang belajar nyaman. Akses koleksi kami kapan saja, di mana saja.
+                </p>
+                <div class="hero-buttons">
+                    <button class="btn-primary" onclick="scrollToSection('koleksi')">Jelajahi Koleksi</button>
+                    <button class="btn-outline" onclick="scrollToSection('layanan')">Lihat Layanan</button>
+                </div>
+                <div class="hero-stats">
+                    <div class="stat-item">
+                        <div class="stat-number"><span class="counter" data-target="12847">0</span></div>
+                        <div class="stat-label">Judul Buku</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number"><span class="counter" data-target="4200">0</span>+</div>
+                        <div class="stat-label">Anggota Aktif</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number"><span class="counter" data-target="98">0</span>%</div>
+                        <div class="stat-label">Tingkat Kepuasan</div>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-right">
+                <div class="books-stack">
+                    <div class="book-3d book-1"></div>
+                    <div class="book-3d book-2"></div>
+                    <div class="book-3d book-3"></div>
+                    <div class="book-3d book-4"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Marquee Bar -->
+    <div class="marquee-bar">
+        <div class="marquee-content">
+            <span class="marquee-item">Fiksi Terlaris</span>
+            <span class="marquee-item">Non-Fiksi Terbaik</span>
+            <span class="marquee-item">Sejarah Dunia</span>
+            <span class="marquee-item">Sains & Teknologi</span>
+            <span class="marquee-item">Pengembangan Diri</span>
+            <span class="marquee-item">Biografi Tokoh</span>
+            <span class="marquee-item">Novel Romansa</span>
+            <span class="marquee-item">Buku Anak</span>
+            <span class="marquee-item">Filsafat</span>
+            <span class="marquee-item">Ekonomi & Bisnis</span>
+            <span class="marquee-item">Fiksi Terlaris</span>
+            <span class="marquee-item">Non-Fiksi Terbaik</span>
+            <span class="marquee-item">Sejarah Dunia</span>
+            <span class="marquee-item">Sains & Teknologi</span>
+            <span class="marquee-item">Pengembangan Diri</span>
+            <span class="marquee-item">Biografi Tokoh</span>
+            <span class="marquee-item">Novel Romansa</span>
+            <span class="marquee-item">Buku Anak</span>
+            <span class="marquee-item">Filsafat</span>
+            <span class="marquee-item">Ekonomi & Bisnis</span>
+        </div>
+    </div>
+
+    <!-- Stats Strip -->
+    <section class="stats-strip">
+        <div class="stats-grid">
+            <div class="stat-card reveal" onclick="showToast('📚', 'Total koleksi kami terus bertambah!')">
+                <div class="stat-card-icon">📚</div>
+                <div class="stat-card-number">12.847</div>
+                <div class="stat-card-label">Total Koleksi Buku</div>
+            </div>
+            <div class="stat-card reveal" onclick="showToast('👥', 'Terima kasih telah menjadi bagian dari kami!')">
+                <div class="stat-card-icon">👥</div>
+                <div class="stat-card-number">4.200+</div>
+                <div class="stat-card-label">Anggota Aktif</div>
+            </div>
+            <div class="stat-card reveal" onclick="showToast('🏆', 'PUSTAKA — perpustakaan berprestasi!')">
+                <div class="stat-card-icon">🏆</div>
+                <div class="stat-card-number">15</div>
+                <div class="stat-card-label">Penghargaan Nasional</div>
+            </div>
+            <div class="stat-card reveal" onclick="showToast('⏰', 'Buka setiap hari untuk Anda!')">
+                <div class="stat-card-icon">⏰</div>
+                <div class="stat-card-number">07–21</div>
+                <div class="stat-card-label">Jam Operasional</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Categories Section -->
+    <section class="section section-white" id="kategori">
+        <div class="section-header reveal">
+            <h2 class="section-title">Kategori Koleksi</h2>
+            <p class="section-subtitle">Jelajahi berbagai kategori buku yang tersedia di perpustakaan kami</p>
+        </div>
+        <div class="categories-grid" id="categoriesGrid">
+            <!-- Categories will be rendered by JS -->
+        </div>
+    </section>
+
+    <!-- Books Collection Section -->
+    <section class="section section-cream" id="koleksi">
+        <div class="section-header reveal">
+            <h2 class="section-title">Buku Unggulan</h2>
+            <p class="section-subtitle">Koleksi buku terbaik pilihan kurator PUSTAKA untuk Anda</p>
+        </div>
+        <div class="filter-buttons reveal">
+            <button class="filter-btn active" data-filter="all">Semua</button>
+            <button class="filter-btn" data-filter="Fiksi">Fiksi</button>
+            <button class="filter-btn" data-filter="Non-Fiksi">Non-Fiksi</button>
+            <button class="filter-btn" data-filter="Sejarah">Sejarah</button>
+            <button class="filter-btn" data-filter="Sains">Sains</button>
+        </div>
+        <div class="books-grid" id="booksGrid">
+            <!-- Books will be rendered by JS -->
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section class="section section-dark" id="layanan">
+        <div class="section-header reveal">
+            <h2 class="section-title">Layanan Unggulan</h2>
+            <p class="section-subtitle">Berbagai fasilitas dan layanan untuk mendukung kegiatan membaca Anda</p>
+        </div>
+        <div class="services-grid" id="servicesGrid">
+            <!-- Services will be rendered by JS -->
+        </div>
+    </section>
+
+    <!-- Newsletter Banner -->
+    <section class="newsletter-banner">
+        <div class="reveal">
+            <h2 class="newsletter-title">Jangan Lewatkan Buku Terbaru!</h2>
+            <p class="newsletter-subtitle">Dapatkan rekomendasi buku pilihan setiap minggu langsung ke email Anda</p>
+            <form class="newsletter-form" id="newsletterForm">
+                <input type="email" class="newsletter-input" id="newsletterEmail" placeholder="Masukkan email Anda...">
+                <button type="submit" class="newsletter-btn">Daftar Sekarang</button>
+            </form>
+        </div>
+    </section>
+
+    <!-- Articles Section -->
+    <section class="section section-cream" id="artikel">
+        <div class="section-header reveal">
+            <h2 class="section-title">Artikel & Resensi</h2>
+            <p class="section-subtitle">Tips membaca, ulasan buku, dan berita terbaru seputar literasi</p>
+        </div>
+        <div class="articles-grid" id="articlesGrid">
+            <!-- Articles will be rendered by JS -->
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="section section-white" id="testimoni">
+        <div class="section-header reveal">
+            <h2 class="section-title">Ulasan Anggota Setia</h2>
+            <p class="section-subtitle">Apa kata mereka tentang pengalaman menggunakan PUSTAKA</p>
+        </div>
+        <div class="testimonials-grid" id="testimonialsGrid">
+            <!-- Testimonials will be rendered by JS -->
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer" id="footer">
+        <div class="footer-content">
+            <div class="footer-brand">
+                <div class="footer-logo">
+                    <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M4 19.5A2.5 2.5 0 0 0 6.5 22H20V2H6.5A2.5 2.5 0 0 0 4 4.5v15z"/></svg>
+                    <span>PUSTAKA</span>
+                </div>
+                <p class="footer-desc">
+                    Perpustakaan digital modern yang menyediakan akses ke ribuan judul buku, audiobook, dan ruang belajar nyaman. Buka setiap hari 07.00–21.00 WIB.
+                </p>
+                <p class="footer-desc" style="margin-top: -15px;">
+                    📍 Jl. Perpustakaan No. 1, Jakarta<br>
+                    📞 (021) 1234-5678<br>
+                    ✉️ pustaka@perpustakaan.id
+                </p>
+                <div class="footer-social">
+                    <button class="social-btn" onclick="showToast('📸', 'Ikuti kami di Instagram @pustaka_id!')">
+                        <svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+                    </button>
+                    <button class="social-btn" onclick="showToast('🐦', 'Follow Twitter kami @pustaka_id!')">
+                        <svg viewBox="0 0 24 24"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"/></svg>
+                    </button>
+                    <button class="social-btn" onclick="showToast('👍', 'Like Facebook Page kami!')">
+                        <svg viewBox="0 0 24 24"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+                    </button>
+                    <button class="social-btn" onclick="showToast('▶️', 'Subscribe YouTube PUSTAKA!')">
+                        <svg viewBox="0 0 24 24"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"/><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"/></svg>
+                    </button>
+                </div>
+            </div>
+            <div class="footer-column">
+                <h4>Koleksi</h4>
+                <ul class="footer-links">
+                    <li><a href="#" onclick="showToast('📚', 'Halaman Buku Terbaru segera hadir!')">Buku Terbaru</a></li>
+                    <li><a href="#" onclick="showToast('🔥', 'Halaman Buku Terlaris segera hadir!')">Buku Terlaris</a></li>
+                    <li><a href="#" onclick="showToast('⭐', 'Rekomendasi Editor segera hadir!')">Rekomendasi Editor</a></li>
+                    <li><a href="#" onclick="filterByCategory('all')">Semua Kategori</a></li>
+                    <li><a href="#" onclick="showToast('📰', 'E-Journal segera hadir!')">E-Journal & Jurnal</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h4>Layanan</h4>
+                <ul class="footer-links">
+                    <li><a href="#" onclick="showToast('📲', 'Layanan Pinjam Online sudah tersedia!')">Pinjam Online</a></li>
+                    <li><a href="#" onclick="showToast('🔄', 'Fitur Perpanjang segera hadir!')">Perpanjang Pinjaman</a></li>
+                    <li><a href="#" onclick="showToast('📅', 'Fitur Reservasi segera hadir!')">Reservasi Buku</a></li>
+                    <li><a href="#" onclick="showToast('📖', 'Info Ruang Baca segera hadir!')">Ruang Baca</a></li>
+                    <li><a href="#" onclick="showToast('🎓', 'Program Literasi segera hadir!')">Program Literasi</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h4>Informasi</h4>
+                <ul class="footer-links">
+                    <li><a href="#" onclick="showToast('ℹ️', 'Halaman Tentang Kami segera hadir!')">Tentang PUSTAKA</a></li>
+                    <li><a href="#" onclick="showToast('📞', 'Hubungi: (021) 1234-5678')">Hubungi Kami</a></li>
+                    <li><a href="#" onclick="showToast('❓', 'Halaman FAQ segera hadir!')">FAQ</a></li>
+                    <li><a href="#artikel">Blog & Artikel</a></li>
+                    <li><a href="#" onclick="showToast('📍', 'Jl. Perpustakaan No. 1, Jakarta')">Lokasi & Peta</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p class="footer-copyright">© 2025 PUSTAKA — Perpustakaan Digital. Semua hak cipta dilindungi.</p>
+            <div class="footer-badges">
+                <span class="footer-badge">GRATIS</span>
+                <span class="footer-badge">KARTU ANGGOTA</span>
+                <span class="footer-badge">ONLINE</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Cart Sidebar -->
+    <div class="cart-overlay" id="cartOverlay"></div>
+    <div class="cart-sidebar" id="cartSidebar">
+        <div class="cart-header">
+            <h3>Keranjang Pinjaman</h3>
+            <button class="cart-close" id="cartClose">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+        <div class="cart-items" id="cartItems">
+            <!-- Cart items will be rendered by JS -->
+        </div>
+        <div class="cart-footer">
+            <div class="cart-total">
+                <span class="cart-total-label">Total Buku</span>
+                <span class="cart-total-value" id="cartTotal">0</span>
+            </div>
+            <button class="cart-checkout-btn" id="checkoutBtn">Ajukan Peminjaman</button>
+        </div>
+    </div>
+
+    <!-- Book Modal -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <button class="modal-close" id="modalClose">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+            <div class="modal-content" id="modalContent">
+                <!-- Modal content will be rendered by JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script>
+        // ══════════════════════════════════════════════════════════
+        // DATA
+        // ══════════════════════════════════════════════════════════
+        const categories = [
+            { icon: '📖', name: 'Fiksi', count: 3420, image: 'https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=400' },
+            { icon: '🧠', name: 'Non-Fiksi', count: 2890, image: 'https://images.unsplash.com/photo-1456324504439-367cee3b3c32?w=400' },
+            { icon: '🏛️', name: 'Sejarah', count: 1540, image: 'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?w=400' },
+            { icon: '🔬', name: 'Sains', count: 980, image: 'https://images.unsplash.com/photo-1507413245164-6160d8298b31?w=400' },
+            { icon: '💼', name: 'Bisnis', count: 870, image: 'https://images.unsplash.com/photo-1553729459-efe14ef6055d?w=400' },
+            { icon: '🧒', name: 'Anak-Anak', count: 760, image: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=400' },
+            { icon: '🎭', name: 'Biografi', count: 640, image: 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=400' },
+            { icon: '🌍', name: 'Budaya', count: 520, image: 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=400' }
+        ];
+
+        const books = [
+            {
+                id: 1,
+                title: 'Laskar Pelangi',
+                author: 'Andrea Hirata',
+                year: 2005,
+                genre: 'Novel',
+                category: 'Fiksi',
+                rating: 4.9,
+                reviews: 3421,
+                badge: 'Populer',
+                description: 'Kisah persahabatan sepuluh anak kampung Belitong yang penuh semangat dan harapan dalam menggapai mimpi setinggi langit.',
+                image: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=400',
+                color: '#c0392b'
+            },
+            {
+                id: 2,
+                title: 'Bumi Manusia',
+                author: 'Pramoedya Ananta Toer',
+                year: 1980,
+                genre: 'Sejarah',
+                category: 'Sejarah',
+                rating: 4.9,
+                reviews: 2876,
+                badge: 'Rekomendasi',
+                description: 'Novel sejarah Indonesia yang mengisahkan Minke, seorang pribumi yang berjuang melawan kolonialisme Belanda dengan pena dan hatinya.',
+                image: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?w=400',
+                color: '#5d4037'
+            },
+            {
+                id: 3,
+                title: 'Filosofi Teras',
+                author: 'Henry Manampiring',
+                year: 2019,
+                genre: 'Pengembangan Diri',
+                category: 'Non-Fiksi',
+                rating: 4.8,
+                reviews: 4521,
+                badge: 'Populer',
+                description: 'Panduan hidup Stoisisme untuk generasi muda modern. Belajar menghadapi emosi negatif dan meraih ketenangan jiwa di tengah dunia yang kacau.',
+                image: 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=400',
+                color: '#1a5276'
+            },
+            {
+                id: 4,
+                title: 'Atomic Habits',
+                author: 'James Clear',
+                year: 2018,
+                genre: 'Produktivitas',
+                category: 'Non-Fiksi',
+                rating: 4.9,
+                reviews: 8900,
+                badge: 'Populer',
+                description: 'Cara mudah dan terbukti ilmiah untuk membangun kebiasaan baik dan menghilangkan kebiasaan buruk secara permanen dalam hidup.',
+                image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400',
+                color: '#1c1c1c'
+            },
+            {
+                id: 5,
+                title: 'Harry Potter & Batu Bertuah',
+                author: 'J.K. Rowling',
+                year: 1997,
+                genre: 'Fantasi',
+                category: 'Fiksi',
+                rating: 4.9,
+                reviews: 12000,
+                badge: 'Baru',
+                badgeType: 'new',
+                description: 'Kisah epik seorang penyihir muda yang belajar sihir di Sekolah Sihir Hogwarts sambil menghadapi kejahatan sang penyihir gelap.',
+                image: 'https://images.unsplash.com/photo-1516979187457-637abb4f9353?w=400',
+                color: '#6c3483'
+            },
+            {
+                id: 6,
+                title: 'Sapiens',
+                author: 'Yuval Noah Harari',
+                year: 2011,
+                genre: 'Sejarah',
+                category: 'Sejarah',
+                rating: 4.8,
+                reviews: 6700,
+                badge: 'Rekomendasi',
+                badgeType: 'recommended',
+                description: 'Sejarah singkat umat manusia dari zaman batu hingga era revolusi ilmiah. Bagaimana Homo sapiens berhasil menguasai seluruh bumi?',
+                image: 'https://images.unsplash.com/photo-1589829085413-56de8ae18c73?w=400',
+                color: '#566573'
+            },
+            {
+                id: 7,
+                title: 'Dilan 1990',
+                author: 'Pidi Baiq',
+                year: 2014,
+                genre: 'Romansa',
+                category: 'Fiksi',
+                rating: 4.7,
+                reviews: 5200,
+                badge: 'Populer',
+                description: 'Kisah cinta manis anak SMA di kota Bandung tahun 1990 yang penuh kenangan indah, humor, dan momen romantis yang tak terlupakan.',
+                image: 'https://images.unsplash.com/photo-1501504905252-473c47e087f8?w=400',
+                color: '#e91e63'
+            },
+            {
+                id: 8,
+                title: 'Thinking, Fast and Slow',
+                author: 'Daniel Kahneman',
+                year: 2011,
+                genre: 'Psikologi',
+                category: 'Sains',
+                rating: 4.8,
+                reviews: 7800,
+                badge: 'Rekomendasi',
+                badgeType: 'recommended',
+                description: 'Pemenang Nobel Ekonomi mengungkap dua sistem berpikir manusia dan bagaimana kita bisa membuat keputusan yang lebih baik dalam hidup.',
+                image: 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=400',
+                color: '#5dade2'
+            }
+        ];
+
+        const services = [
+            { icon: '📲', title: 'Pinjam Digital', desc: 'Pinjam buku tanpa harus datang ke perpustakaan. Akses koleksi digital dari HP atau laptop kapan saja.' },
+            { icon: '🔍', title: 'Pencarian Canggih', desc: 'Temukan buku dengan filter genre, pengarang, tahun terbit, ketersediaan, dan rating pembaca.' },
+            { icon: '📅', title: 'Reservasi Buku', desc: 'Reservasi buku yang sedang dipinjam anggota lain agar kamu jadi yang pertama mendapatkannya.' },
+            { icon: '🎧', title: 'Audiobook Premium', desc: 'Ratusan judul audiobook berkualitas tinggi. Belajar dan menikmati buku sambil beraktivitas.' },
+            { icon: '📝', title: 'Ruang Belajar', desc: 'Ruang baca nyaman dengan WiFi gratis, AC, colokan listrik, dan meja belajar individual untuk kamu.' },
+            { icon: '🎓', title: 'Program Literasi', desc: 'Klub buku mingguan, seminar penulis, dan workshop menulis kreatif setiap bulan untuk semua usia.' }
+        ];
+
+        const articles = [
+            {
+                category: 'Resensi',
+                date: '20 Januari 2025',
+                title: 'Mengapa Atomic Habits Wajib Dibaca Semua Orang',
+                excerpt: 'Buku James Clear telah mengubah cara jutaan orang membangun kebiasaan. Inilah ulasan mendalam mengapa buku ini begitu berpengaruh di seluruh dunia.',
+                image: 'https://images.unsplash.com/photo-1553729459-efe14ef6055d?w=400',
+                readTime: '5 menit'
+            },
+            {
+                category: 'Tips Membaca',
+                date: '15 Januari 2025',
+                title: '5 Cara Efektif Membaca 30 Menit Setiap Hari',
+                excerpt: 'Tidak punya waktu baca? Coba 5 strategi sederhana ini dan rasakan transformasi luar biasa dalam pengetahuan dan produktivitasmu dalam 30 hari.',
+                image: 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=400',
+                readTime: '4 menit'
+            },
+            {
+                category: 'Berita',
+                date: '10 Januari 2025',
+                title: 'PUSTAKA Raih Penghargaan Perpustakaan Terbaik 2024',
+                excerpt: 'Dengan bangga mengumumkan penghargaan dari Kemendikbud sebagai perpustakaan paling inovatif dan berdampak di Indonesia tahun 2024.',
+                image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400',
+                readTime: '3 menit'
+            }
+        ];
+
+        const testimonials = [
+            {
+                name: 'Budi Santoso',
+                role: 'Mahasiswa Teknik UI',
+                rating: 5,
+                image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100',
+                text: 'PUSTAKA benar-benar mengubah cara saya membaca dan belajar. Koleksinya sangat lengkap, antarmukanya mudah digunakan, dan layanan digitalnya memudahkan saya akses buku dari kos. Sudah 2 tahun jadi anggota dan tidak mau pindah!'
+            },
+            {
+                name: 'Sinta Maharani',
+                role: 'Guru SD Negeri 5 Jakarta',
+                rating: 5,
+                image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100',
+                text: 'Layanan peminjaman digitalnya luar biasa! Bisa baca buku kapan saja dari HP tanpa harus datang. Tim kuratornya juga rajin merekomendasikan buku yang sesuai minat dan kebutuhan mengajar saya.'
+            },
+            {
+                name: 'Rizky Pratama',
+                role: 'Pengusaha & Ayah 2 Anak',
+                rating: 5,
+                image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100',
+                text: 'Ruang bacanya nyaman sekali, koleksi fisik dan digitalnya lengkap, dan program literasinya kreatif. Saya sering ajak anak ke sini setiap minggu. Mereka jadi suka membaca berkat PUSTAKA!'
+            }
+        ];
+
+        // ══════════════════════════════════════════════════════════
+        // STATE
+        // ══════════════════════════════════════════════════════════
+        let cart = [];
+        let favorites = new Set();
+        let currentFilter = 'all';
+
+        // ══════════════════════════════════════════════════════════
+        // INITIALIZATION
+        // ══════════════════════════════════════════════════════════
+        document.addEventListener('DOMContentLoaded', function() {
+            // Loading screen
+            setTimeout(() => {
+                document.getElementById('loadingScreen').classList.add('hidden');
+                startCounterAnimation();
+            }, 2000);
+
+            // Initialize components
+            renderCategories();
+            renderBooks();
+            renderServices();
+            renderArticles();
+            renderTestimonials();
+            initNavbar();
+            initCart();
+            initModal();
+            initSearch();
+            initNewsletter();
+            initRevealAnimations();
+            initCustomCursor();
+        });
+
+        // ══════════════════════════════════════════════════════════
+        // CUSTOM CURSOR
+        // ══════════════════════════════════════════════════════════
+        function initCustomCursor() {
+            const cursor = document.getElementById('cursor');
+            
+            document.addEventListener('mousemove', (e) => {
+                cursor.style.left = e.clientX + 'px';
+                cursor.style.top = e.clientY + 'px';
+            });
+
+            const hoverElements = document.querySelectorAll('a, button, .book-card, .category-card, .service-card, .stat-card, .article-card, .testimonial-card');
+            
+            hoverElements.forEach(el => {
+                el.addEventListener('mouseenter', () => cursor.classList.add('hover'));
+                el.addEventListener('mouseleave', () => cursor.classList.remove('hover'));
+            });
+        }
+
+        // ══════════════════════════════════════════════════════════
+        // NAVBAR
+        // ══════════════════════════════════════════════════════════
+        function initNavbar() {
+            const navbar = document.getElementById('navbar');
+            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+            const mobileMenu = document.getElementById('mobileMenu');
+            const loginBtn = document.getElementById('loginBtn');
+
+            // Scroll effect
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 50) {
+                    navbar.classList.add('scrolled');
+                } else {
+                    navbar.classList.remove('scrolled');
+                }
+            });
+
+            // Mobile menu toggle
+            mobileMenuBtn.addEventListener('click', () => {
+                mobileMenu.classList.toggle('active');
+            });
+
+            // Close mobile menu on link click
+            mobileMenu.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', () => {
+                    mobileMenu.classList.remove('active');
+                });
+            });
+
+            // Login button
+            loginBtn.addEventListener('click', () => {
+                showToast('🔐', 'Halaman login segera hadir!');
+            });
+
+            // Favorite button
+            document.getElementById('favoriteBtn').addEventListener('click', () => {
+                if (favorites.size > 0) {
+                    showToast('❤️', `Anda memiliki ${favorites.size} buku favorit!`);
+                } else {
+                    showToast('💔', 'Belum ada buku favorit. Tambahkan sekarang!');
+                }
+            });
+        }
+
+        // ══════════════════════════════════════════════════════════
+        // SEARCH
+        // ══════════════════════════════════════════════════════════
+        function initSearch() {
+            const searchBtn = document.getElementById('searchBtn');
+            const searchWrapper = document.getElementById('searchWrapper');
+            const searchInput = document.getElementById('searchInput');
+
+            searchBtn.addEventListener('click', () => {
+                searchWrapper.classList.toggle('active');
+                if (searchWrapper.classList.contains('active')) {
+                    searchInput.focus();
+                }
+            });
+
+            searchInput.addEventListener('input', (e) => {
+                const query = e.target.value.toLowerCase();
+                filterBooks(query);
+            });
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && searchWrapper.classList.contains('active')) {
+                    searchWrapper.classList.remove('active');
+                    searchInput.value = '';
+                    renderBooks();
+                }
+            });
+        }
+
+        function filterBooks(query) {
+            const filtered = books.filter(book => 
+                book.title.toLowerCase().includes(query) ||
+                book.author.toLowerCase().includes(query)
+            );
+            renderBooks(filtered);
+        }
+
+        // ══════════════════════════════════════════════════════════
+        // COUNTER ANIMATION
+        // ══════════════════════════════════════════════════════════
+        function startCounterAnimation() {
+            const counters = document.querySelectorAll('.counter');
+            
+            counters.forEach(counter => {
+                const target = parseInt(counter.getAttribute('data-target'));
+                const duration = 2000;
+                const step = target / (duration / 16);
+                let current = 0;
+
+                const update = () => {
+                    current += step;
+                    if (current < target) {
+                        counter.textContent = Math.floor(current).toLocaleString();
+                        requestAnimationFrame(update);
+                    } else {
+                        counter.textContent = target.toLocaleString();
+                    }
+                };
+
+                update();
+            });
+        }
+
+        // ══════════════════════════════════════════════════════════
+        // RENDER FUNCTIONS
+        // ══════════════════════════════════════════════════════════
+        function renderCategories() {
+            const grid = document.getElementById('categoriesGrid');
+            grid.innerHTML = categories.map((cat, index) => `
+                <div class="category-card reveal" style="transition-delay: ${index * 0.1}s" onclick="filterByCategory('${cat.name}')">
+                    <img src="${cat.image}" alt="${cat.name}" loading="lazy">
+                    <div class="category-overlay">
+                        <span class="category-icon">${cat.icon}</span>
+                        <h3 class="category-name">${cat.name}</h3>
+                        <p class="category-count">${cat.count.toLocaleString()} judul</p>
+                        <div class="category-arrow">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderBooks(booksToRender = books) {
+            const grid = document.getElementById('booksGrid');
+            let filteredBooks = booksToRender;
+
+            if (currentFilter !== 'all') {
+                filteredBooks = booksToRender.filter(book => book.category === currentFilter);
+            }
+
+            grid.innerHTML = filteredBooks.map((book, index) => `
+                <div class="book-card reveal" style="transition-delay: ${index * 0.1}s" data-category="${book.category}">
+                    <div class="book-image">
+                        <img src="${book.image}" alt="${book.title}" loading="lazy">
+                        <span class="book-badge ${book.badgeType || ''}">${book.badge}</span>
+                        <button class="book-favorite ${favorites.has(book.id) ? 'active' : ''}" onclick="toggleFavorite(${book.id}, event)">
+                            <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                        </button>
+                        <div class="book-hover-actions">
+                            <button class="book-hover-btn btn-detail" onclick="openModal(${book.id})">Detail</button>
+                            <button class="book-hover-btn btn-borrow" onclick="addToCart(${book.id})">Pinjam</button>
+                        </div>
+                    </div>
+                    <div class="book-info">
+                        <span class="book-genre">${book.genre}</span>
+                        <h3 class="book-title">${book.title}</h3>
+                        <p class="book-author">${book.author} <span>• ${book.year}</span></p>
+                        <div class="book-rating">
+                            <div class="stars">
+                                ${generateStars(book.rating)}
+                            </div>
+                            <span class="rating-count">(${book.reviews.toLocaleString()} ulasan)</span>
+                        </div>
+                        <div class="book-footer">
+                            <span class="book-price">Gratis / pinjam</span>
+                            <button class="book-add-btn" onclick="addToCart(${book.id})">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            // Re-init reveal animations for new elements
+            initRevealAnimations();
+        }
+
+        function generateStars(rating) {
+            const fullStars = Math.floor(rating);
+            let stars = '';
+            for (let i = 0; i < 5; i++) {
+                if (i < fullStars) {
+                    stars += '<svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>';
+                } else {
+                    stars += '<svg viewBox="0 0 24 24" style="opacity: 0.3"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>';
+                }
+            }
+            return stars;
+        }
+
+        function renderServices() {
+            const grid = document.getElementById('servicesGrid');
+            grid.innerHTML = services.map((service, index) => `
+                <div class="service-card reveal" style="transition-delay: ${index * 0.1}s">
+                    <span class="service-icon">${service.icon}</span>
+                    <h3 class="service-title">${service.title}</h3>
+                    <p class="service-desc">${service.desc}</p>
+                </div>
+            `).join('');
+        }
+
+        function renderArticles() {
+            const grid = document.getElementById('articlesGrid');
+            grid.innerHTML = articles.map((article, index) => `
+                <div class="article-card reveal" style="transition-delay: ${index * 0.1}s" onclick="showToast('📰', 'Artikel lengkap segera hadir!')">
+                    <div class="article-image">
+                        <img src="${article.image}" alt="${article.title}" loading="lazy">
+                    </div>
+                    <div class="article-content">
+                        <div class="article-meta">
+                            <span class="article-category">${article.category}</span>
+                            <span class="article-date">${article.date}</span>
+                        </div>
+                        <h3 class="article-title">${article.title}</h3>
+                        <p class="article-excerpt">${article.excerpt}</p>
+                        <span class="article-read-time">⏱️ ${article.readTime} baca</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderTestimonials() {
+            const grid = document.getElementById('testimonialsGrid');
+            grid.innerHTML = testimonials.map((testimonial, index) => `
+                <div class="testimonial-card reveal" style="transition-delay: ${index * 0.1}s">
+                    <div class="testimonial-header">
+                        <img src="${testimonial.image}" alt="${testimonial.name}" class="testimonial-avatar" loading="lazy">
+                        <div class="testimonial-info">
+                            <h4>${testimonial.name}</h4>
+                            <p>${testimonial.role}</p>
+                        </div>
+                    </div>
+                    <div class="testimonial-stars">
+                        ${generateStars(testimonial.rating)}
+                    </div>
+                    <p class="testimonial-text">"${testimonial.text}"</p>
+                </div>
+            `).join('');
+        }
+
+        // ══════════════════════════════════════════════════════════
+        // FILTER FUNCTIONALITY
+        // ══════════════════════════════════════════════════════════
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentFilter = btn.getAttribute('data-filter');
+                renderBooks();
+            });
+        });
+
+        function filterByCategory(category) {
+            currentFilter = category === 'all' ? 'all' : category;
+            
+            // Update filter buttons
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.getAttribute('data-filter') === currentFilter) {
+                    btn.classList.add('active');
+                }
+            });
+
+            // If category not in filter buttons, select "Semua"
+            if (currentFilter !== 'all' && !['Fiksi', 'Non-Fiksi', 'Sejarah', 'Sains'].includes(currentFilter)) {
+                document.querySelector('.filter-btn[data-filter="all"]').classList.add('active');
+                currentFilter = 'all';
+            }
+
+            renderBooks();
+            scrollToSection('koleksi');
+        }
+
+        // ══════════════════════════════════════════════════════════
+        // CART FUNCTIONALITY
+        // ══════════════════════════════════════════════════════════
+        function initCart() {
+            const cartBtn = document.getElementById('cartBtn');
+            const cartOverlay = document.getElementById('cartOverlay');
+            const cartSidebar = document.getElementById('cartSidebar');
+            const cartClose = document.getElementById('cartClose');
+            const checkoutBtn = document.getElementById('checkoutBtn');
+
+            cartBtn.addEventListener('click', () => {
+                cartOverlay.classList.add('active');
+                cartSidebar.classList.add('active');
+            });
+
+            cartOverlay.addEventListener('click', closeCart);
+            cartClose.addEventListener('click', closeCart);
+
+            checkoutBtn.addEventListener('click', () => {
+                if (cart.length > 0) {
+                    showToast('🎉', 'Peminjaman berhasil diajukan!');
+                    cart = [];
+                    updateCart();
+                    closeCart();
+                } else {
+                    showToast('⚠️', 'Keranjang masih kosong!');
+                }
+            });
+        }
+
+        function closeCart() {
+            document.getElementById('cartOverlay').classList.remove('active');
+            document.getElementById('cartSidebar').classList.remove('active');
+        }
+
+        function addToCart(bookId) {
+            const book = books.find(b => b.id === bookId);
+            const existingItem = cart.find(item => item.id === bookId);
+
+            if (existingItem) {
+                existingItem.qty++;
+            } else {
+                cart.push({ ...book, qty: 1 });
+            }
+
+            updateCart();
+            showToast('📚', `"${book.title}" ditambahkan!`);
+        }
+
+        function removeFromCart(bookId) {
+            cart = cart.filter(item => item.id !== bookId);
+            updateCart();
+        }
+
+        function updateQty(bookId, change) {
+            const item = cart.find(i => i.id === bookId);
+            if (item) {
+                item.qty += change;
+                if (item.qty <= 0) {
+                    removeFromCart(bookId);
+                } else {
+                    updateCart();
+                }
+            }
+        }
+
+        function updateCart() {
+            const cartItems = document.getElementById('cartItems');
+            const cartTotal = document.getElementById('cartTotal');
+            const cartBadge = document.getElementById('cartBadge');
+
+            const totalItems = cart.reduce((sum, item) => sum + item.qty, 0);
+            cartBadge.textContent = totalItems;
+            cartTotal.textContent = totalItems + ' Buku';
+
+            if (cart.length === 0) {
+                cartItems.innerHTML = `
+                    <div class="cart-empty">
+                        <div class="cart-empty-icon">📚</div>
+                        <p class="cart-empty-text">Keranjang pinjaman Anda kosong.<br>Mulai jelajahi koleksi kami!</p>
+                    </div>
+                `;
+            } else {
+                cartItems.innerHTML = cart.map(item => `
+                    <div class="cart-item">
+                        <img src="${item.image}" alt="${item.title}" class="cart-item-image">
+                        <div class="cart-item-info">
+                            <h4 class="cart-item-title">${item.title}</h4>
+                            <p class="cart-item-author">${item.author}</p>
+                            <div class="cart-item-controls">
+                                <button class="qty-btn" onclick="updateQty(${item.id}, -1)">−</button>
+                                <span class="cart-item-qty">${item.qty}</span>
+                                <button class="qty-btn" onclick="updateQty(${item.id}, 1)">+</button>
+                                <button class="cart-item-remove" onclick="removeFromCart(${item.id})">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        // ══════════════════════════════════════════════════════════
+        // FAVORITES
+        // ══════════════════════════════════════════════════════════
+        function toggleFavorite(bookId, event) {
+            event.stopPropagation();
+            const book = books.find(b => b.id === bookId);
+            
+            if (favorites.has(bookId)) {
+                favorites.delete(bookId);
+                showToast('💔', 'Dihapus dari favorit');
+            } else {
+                favorites.add(bookId);
+                showToast('❤️', 'Ditambahkan ke favorit!');
+            }
+            
+            renderBooks();
+        }
+
+        // ══════════════════════════════════════════════════════════
+        // MODAL
+        // ══════════════════════════════════════════════════════════
+        function initModal() {
+            const modalOverlay = document.getElementById('modalOverlay');
+            const modalClose = document.getElementById('modalClose');
+
+            modalClose.addEventListener('click', closeModal);
+            modalOverlay.addEventListener('click', (e) => {
+                if (e.target === modalOverlay) closeModal();
+            });
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') closeModal();
+            });
+        }
+
+        function openModal(bookId) {
+            const book = books.find(b => b.id === bookId);
+            const modalOverlay = document.getElementById('modalOverlay');
+            const modalContent = document.getElementById('modalContent');
+
+            modalContent.innerHTML = `
+                <div class="modal-image">
+                    <img src="${book.image}" alt="${book.title}">
+                </div>
+                <div class="modal-info">
+                    <span class="modal-genre">${book.genre}</span>
+                    <h2 class="modal-title">${book.title}</h2>
+                    <p class="modal-author">${book.author} • ${book.year}</p>
+                    <div class="modal-rating">
+                        <div class="stars">${generateStars(book.rating)}</div>
+                        <span class="modal-rating-text">${book.rating} (${book.reviews.toLocaleString()} ulasan)</span>
+                    </div>
+                    <p class="modal-desc">${book.description}</p>
+                    <div class="modal-chips">
+                        <span class="modal-chip">📅 Tahun ${book.year}</span>
+                        <span class="modal-chip">📂 ${book.category}</span>
+                        <span class="modal-chip">✅ Tersedia</span>
+                    </div>
+                    <div class="modal-buttons">
+                        <button class="modal-btn modal-btn-primary" onclick="addToCart(${book.id}); closeModal();">Pinjam Sekarang</button>
+                        <button class="modal-btn modal-btn-secondary" onclick="toggleFavorite(${book.id}, event)">
+                            ${favorites.has(book.id) ? '💔 Hapus Favorit' : '❤️ Tambah Favorit'}
+                        </button>
+                    </div>
+                    <p class="modal-note">📖 Gratis pinjam • Maks. 14 hari • Bisa diperpanjang</p>
+                </div>
+            `;
+
+            modalOverlay.classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('modalOverlay').classList.remove('active');
+        }
+
+        // ══════════════════════════════════════════════════════════
+        // NEWSLETTER
+        // ══════════════════════════════════════════════════════════
+        function initNewsletter() {
+            const form = document.getElementById('newsletterForm');
+            const emailInput = document.getElementById('newsletterEmail');
+
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const email = emailInput.value.trim();
+                
+                if (!email || !isValidEmail(email)) {
+                    showToast('⚠️', 'Masukkan email yang valid!');
+                    return;
+                }
+
+                showToast('🎉', 'Berhasil didaftarkan!');
+                emailInput.value = '';
+            });
+        }
+
+        function isValidEmail(email) {
+            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+        }
+
+        // ══════════════════════════════════════════════════════════
+        // TOAST NOTIFICATIONS
+        // ══════════════════════════════════════════════════════════
+        function showToast(icon, message) {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.innerHTML = `
+                <span class="toast-icon">${icon}</span>
+                <span class="toast-message">${message}</span>
+            `;
+
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.classList.add('removing');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // ══════════════════════════════════════════════════════════
+        // SCROLL REVEAL ANIMATIONS
+        // ══════════════════════════════════════════════════════════
+        function initRevealAnimations() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('active');
+                    }
+                });
+            }, {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            });
+
+            document.querySelectorAll('.reveal').forEach(el => {
+                observer.observe(el);
+            });
+        }
+
+        // ══════════════════════════════════════════════════════════
+        // UTILITIES
+        // ══════════════════════════════════════════════════════════
+        function scrollToSection(sectionId) {
+            const section = document.getElementById(sectionId);
+            if (section) {
+                section.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+    </script>
+</body>
+</html>
